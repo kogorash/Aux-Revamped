@@ -9,6 +9,14 @@ function status(enabled)
 	return (enabled and aux.color.green'on' or aux.color.red'off')
 end
 
+-- helper for clamping numeric settings (used by /aux value ...)
+local function _aux_clamp(x, lo, hi)
+    if x < lo then return lo end
+    if x > hi then return hi end
+    return x
+end
+---------------------------------
+
 _G.SLASH_AUX1 = '/aux'
 function SlashCmdList.AUX(command)
 	if not command then return end
