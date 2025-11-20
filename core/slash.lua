@@ -64,6 +64,83 @@ function SlashCmdList.AUX(command)
 	elseif arguments[1] == 'show' and arguments[2] == 'hidden' then
 		aux.account_data.showhidden = not aux.account_data.showhidden
 		aux.print('show hidden ' .. status(aux.account_data.showhidden))
+	
+	-------------------------------------
+	elseif arguments[1] == 'value' and arguments[2] == 'top' and arguments[3] == 'pctl' and arguments[4] then
+		local v = tonumber(arguments[4])
+		if v then
+			v = _aux_clamp(v, 0.05, 1.00)
+			aux.account_data.value_depth_fraction = v
+			aux.print('value top percentile set to ' .. aux.color.blue(string.format('%.2f', v)))
+		else
+			aux.print('Usage: /aux value top pctl <0.05 .. 1.00>')
+		end
+
+	elseif arguments[1] == 'value' and arguments[2] == 'bot' and arguments[3] == 'pctl' and arguments[4] then
+		local v = tonumber(arguments[4])
+		if v then
+			v = _aux_clamp(v, 0.00, 0.25)
+			aux.account_data.value_trim_low = v
+			aux.print('value bottom percentile set to ' .. aux.color.blue(string.format('%.2f', v)))
+		else
+			aux.print('Usage: /aux value bot pctl <0.00 .. 0.25>')
+		end
+
+	elseif arguments[1] == 'value' and arguments[2] == 'min' and arguments[3] == 'qty' and arguments[4] then
+		local v = tonumber(arguments[4])
+		if v then
+			v = math.max(1, math.floor(v + 0.5))
+			aux.account_data.value_min_total_qty = v
+			aux.print('value min qty set to ' .. aux.color.blue(tostring(v)))
+		else
+			aux.print('Usage: /aux value min qty <integer >= 1>')
+		end
+
+	elseif arguments[1] == 'value' and not arguments[2] then
+		local top    = aux.account_data.value_depth_fraction or 0.15
+		local bottom = aux.account_data.value_trim_low or 0.00
+		local minQty = aux.account_data.value_min_total_qty or 5
+		aux.print('value settings (percentiles from cheapest side):')
+		aux.print('- value top pctl = ' .. aux.color.blue(string.format('%.2f', top)))
+		aux.print('- value bot pctl = ' .. aux.color.blue(string.format('%.2f', bottom)))
+		aux.print('- value min qty = ' .. aux.color.blue(tostring(minQty)))
+
+		
+
+	-- Back-compat aliases (old names still work)
+	elseif arguments[1] == 'value' and arguments[2] == 'depth' and arguments[3] then
+		local v = tonumber(arguments[3])
+		if v then
+			v = _aux_clamp(v, 0.05, 1.00)
+			aux.account_data.value_depth_fraction = v
+			aux.print('value top percentile set to ' .. aux.color.blue(string.format('%.2f', v)))
+		else
+			aux.print('Usage: /aux value top pctl <0.05 .. 1.00>')
+		end
+
+	elseif arguments[1] == 'value' and arguments[2] == 'trimlow' and arguments[3] then
+		local v = tonumber(arguments[3])
+		if v then
+			v = _aux_clamp(v, 0.00, 0.25)
+			aux.account_data.value_trim_low = v
+			aux.print('value bottom percentile set to ' .. aux.color.blue(string.format('%.2f', v)))
+		else
+			aux.print('Usage: /aux value bot pctl <0.00 .. 0.25>')
+		end
+
+	elseif arguments[1] == 'value' and arguments[2] == 'minqty' and arguments[3] then
+		local v = tonumber(arguments[3])
+		if v then
+			v = math.max(1, math.floor(v + 0.5))
+			aux.account_data.value_min_total_qty = v
+			aux.print('value min qty set to ' .. aux.color.blue(tostring(v)))
+		else
+			aux.print('Usage: /aux value min qty <integer >= 1>')
+		end
+
+	-------------------------------------
+	
+	
 	else
 		aux.print('Usage:')
 		aux.print('- scale [' .. aux.color.blue(aux.account_data.scale) .. ']')
