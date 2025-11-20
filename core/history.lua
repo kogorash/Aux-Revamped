@@ -27,8 +27,8 @@ local value_cache = {}
 -- These can be edited in-game via /aux value depth|trimlow|minqty (see slash.lua patch)
 ------------------------------------------------------------
 local today_samples = {}
-local DEFAULT_DEPTH_FRACTION = 0.15   -- take up to this quantile from the cheap side (e.g., 40%)
-local DEFAULT_TRIM_LOW       = 0.00   -- ignore the cheapest this fraction first (e.g., 5%)
+local DEFAULT_DEPTH_FRACTION = 0.25   -- take up to this quantile from the cheap side (e.g., 40%)
+local DEFAULT_TRIM_LOW       = 0.02   -- ignore the cheapest this fraction first (e.g., 5%)
 local MIN_TOTAL_QTY_DEFAULT  = 5      -- require at least this many units to trust the daily calc
 
 local function get_value_settings()
