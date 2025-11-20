@@ -1,9 +1,22 @@
 # Aux-Revamped
-20251120
-I'll try to add this patch in current best fork of aux
+
+2025.11.20
+
+A patch has been added to more accurately calculate the average price, taken from reddit:
 https://www.reddit.com/r/turtlewow/comments/1nd883h/update_to_the_value_calculation_method_of_the_aux/
 
+recommended aux settings:
+/aux value top pctl 0.20 (The cheapest 20% of items will be used for the calculation)
+/aux value bot pctl 0.04 (cut off random sales at a non-market cheap price)
+/aux sharing off (Disable the use of other players' scanning results. It's inconvenient, I know, but this data can significantly distort your estimated prices.)
 
+if you want to reset old history - delete this file: \WoW\WTF\Account\[accountname]\SavedVariables\aux-addon.lua (before applying /aux settings above)
+
+
+
+
+
+------------------------------------------------------------------------------------
 
 
 Changelog (for those who don't dig into reading all the commits):
