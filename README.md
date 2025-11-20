@@ -1,5 +1,12 @@
 # Aux-Revamped
+20251120
+I'll try to add this patch in current best fork of aux
+https://www.reddit.com/r/turtlewow/comments/1nd883h/update_to_the_value_calculation_method_of_the_aux/
 
+
+
+
+Changelog (for those who don't dig into reading all the commits):
 * A refreshed and transparent UI update for the classic Aux auction addon.
 ![image](https://github.com/user-attachments/assets/5657e872-3cd3-437a-874a-b3e2732f06f4)
 
