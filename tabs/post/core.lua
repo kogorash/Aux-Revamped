@@ -728,3 +728,21 @@ function initialize_duration_dropdown()
         func = on_click,
     }
 end
+
+------------------------------------------
+function setValue_button_click()
+	
+	local unit_buyout_price = get_unit_buyout_price()
+	
+	if not selected_item then
+        	print("Select item to clear data!")
+		return
+	elseif unit_buyout_price == 0 then
+        	print('Set "Unit buyout price"!')
+		return
+	end
+	
+	scan.abort(scan_id)
+	history.setNewValue_AndClearHistory(selected_item.key, unit_buyout_price)
+
+end
