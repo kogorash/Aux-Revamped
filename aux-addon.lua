@@ -57,7 +57,7 @@ function handle.LOAD()
         scale = 1,
         ignore_owner = true,
         crafting_cost = true,
-        post_bid = false,
+        post_bid = true,
         post_duration = post.DURATION_24,
 		post_stack = true,
         items = {},
@@ -65,7 +65,7 @@ function handle.LOAD()
         auctionable_items = {},
         merchant_buy = {},
         merchant_sell = {},
-		sharing = true,
+		sharing = false,
     })
     do
         local key = format('%s|%s', GetCVar'realmName', UnitName'player')
