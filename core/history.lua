@@ -112,7 +112,7 @@ local function compute_window_vwap(entries, depth_fraction, trim_low, min_total_
     end
 
     if vwap_den > 0 then
-        return vwap_num / vwap_den, false
+        return aux.round(vwap_num / vwap_den), false
     end
 
     -- Safety: if we couldn't build VWAP for any reason, fall back to min
@@ -121,6 +121,23 @@ local function compute_window_vwap(entries, depth_fraction, trim_low, min_total_
 end
 
 
+------------------------------------------------------------
+function M.clear_data_points(item_key)
+    if not item_key then return end
+    
+    local item_record = read_record(item_key)
+    
+    if item_record.data_points then
+        for i = 1, getn(item_record.data_points) do
+            T.release(item_record.data_points[i])
+        end
+        item_record.data_points = T.acquire()
+    end
+    
+   write_record(item_key, item_record)
+    
+    return true
+end
 ------------------------------------------------------------
 
 function aux.handle.LOAD2()
@@ -215,6 +232,10 @@ function M.process_auction(auction_record, pages)
 	-- Accumulate today's entries for this item
     if unit_buyout_price > 0 then
 
+		-- the "today_samples[item_key]" table contains cumulative data from all item scans for the day. 
+		-- Repeated scans duplicate the data, but since a percentage sample is taken, the final price is generally accurate.
+		-- TODO !!! check for excessive table bloat
+		
 		local rec = today_samples[item_key]
 	    if not rec then
 	        rec = { entries = {}, total_qty = 0 }
@@ -225,8 +246,11 @@ function M.process_auction(auction_record, pages)
 	
 	    local depth_fraction, trim_low, min_total_qty = get_value_settings()
 	    local v = compute_window_vwap(rec.entries, depth_fraction, trim_low, min_total_qty)
-	
-	    if v and v > 0 then
+
+		--prevent spamming changes
+		if v and v > 0 
+			and (v > item_record.daily_min_buyout + 1 or v < item_record.daily_min_buyout - 1) then
+			
 	        item_record.daily_min_buyout = v
 	        write_record(item_key, item_record)
 	    end
