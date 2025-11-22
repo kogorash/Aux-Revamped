@@ -122,7 +122,7 @@ end
 
 
 ------------------------------------------------------------
-function M.clear_data_points(item_key)
+function M.setNewValue_AndClearHistory(item_key, newValue)
     if not item_key then return end
     
     local item_record = read_record(item_key)
@@ -134,8 +134,14 @@ function M.clear_data_points(item_key)
         item_record.data_points = T.acquire()
     end
     
-   write_record(item_key, item_record)
+    item_record.daily_min_buyout = newValue
+
+    write_record(item_key, item_record)
     
+    DevTools_Dump(item_record)
+    
+    --item_record.daily_min_buyout = v
+			
     return true
 end
 ------------------------------------------------------------
@@ -248,11 +254,16 @@ function M.process_auction(auction_record, pages)
 	    local v = compute_window_vwap(rec.entries, depth_fraction, trim_low, min_total_qty)
 
 		--prevent spamming changes
-		if v and v > 0 
-			and (v > item_record.daily_min_buyout + 1 or v < item_record.daily_min_buyout - 1) then
-			
-	        item_record.daily_min_buyout = v
-	        write_record(item_key, item_record)
+		if v and v > 0 then
+			if not item_record.daily_min_buyout 
+				or (item_record.daily_min_buyout 
+					and (v > item_record.daily_min_buyout + 1 or v < item_record.daily_min_buyout - 1)) then
+				
+				--print(" item_record.daily_min_buyout = " .. item_record.daily_min_buyout)
+				item_record.daily_min_buyout = v
+				write_record(item_key, item_record)
+			end
+		
 	    end
 	
 	
