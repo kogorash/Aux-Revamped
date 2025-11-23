@@ -138,10 +138,8 @@ function M.setNewValue_AndClearHistory(item_key, newValue)
 
     write_record(item_key, item_record)
     
-    DevTools_Dump(item_record)
-    
-    --item_record.daily_min_buyout = v
-			
+    --DevTools_Dump(item_record)
+    		
     return true
 end
 ------------------------------------------------------------
