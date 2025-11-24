@@ -581,7 +581,13 @@ function update_inventory_records()
 	    T.temp(slot)
 	    local item_info = T.temp-info.container_item(unpack(slot))
         if item_info then
-            local charge_class = item_info.charges or 0
+       
+			-- ??? bugged negative count sometimes
+			if item_info.count < 0 then
+				item_info.count = -item_info.count
+			end
+			
+			local charge_class = item_info.charges or 0
             if info.auctionable(item_info.tooltip, nil, true) and not item_info.lootable then
                 if not auctionable_map[item_info.item_key] then
                     local availability = T.acquire()
