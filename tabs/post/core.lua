@@ -185,7 +185,8 @@ function price_update()
     if selected_item then
         local historical_value = history.value(selected_item.key)
         if get_bid_selection() or get_buyout_selection() then
-	        set_unit_start_price(undercut(get_bid_selection() or get_buyout_selection(), stack_size_slider:GetValue(), get_bid_selection()))
+	        --set_unit_start_price(undercut(get_bid_selection() or get_buyout_selection(), stack_size_slider:GetValue(), get_bid_selection()))
+			set_unit_start_price(undercut(get_bid_selection() or get_buyout_selection(), stack_size_slider:GetValue())
 	        unit_start_price_input:SetText(money.to_string(get_unit_start_price(), true, nil, nil, true))
         end
         if get_buyout_selection() then
@@ -483,11 +484,13 @@ end
 end
 
 function undercut(record, stack_size, stack)
-    local price = ceil(record.unit_price * (stack and record.stack_size or stack_size))
-    if not record.own then
+    --local price = ceil(record.unit_price * (stack and record.stack_size or stack_size))
+	local price = floor(ceil(record.unit_price * (stack and record.stack_size or stack_size)) / stack_size)
+	if not record.own then
 	    price = price - 1
     end
-    return price / stack_size
+    --return price / stack_size
+	return price
 end
 
 function quantity_update(maximize_count)
