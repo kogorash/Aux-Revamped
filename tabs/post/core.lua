@@ -186,7 +186,7 @@ function price_update()
         local historical_value = history.value(selected_item.key)
         if get_bid_selection() or get_buyout_selection() then
 	        --set_unit_start_price(undercut(get_bid_selection() or get_buyout_selection(), stack_size_slider:GetValue(), get_bid_selection()))
-			set_unit_start_price(undercut(get_bid_selection() or get_buyout_selection(), stack_size_slider:GetValue())
+			set_unit_start_price(undercut(get_bid_selection() or get_buyout_selection(), stack_size_slider:GetValue()))
 	        unit_start_price_input:SetText(money.to_string(get_unit_start_price(), true, nil, nil, true))
         end
         if get_buyout_selection() then
