@@ -345,11 +345,21 @@ end
 
 -----------------------------------------------
 do
-	local btn = gui.button(frame, gui.font_size.small)
-    btn:SetPoint('RIGHT', hide_checkbox, 'LEFT', -10, 0)
+   
+    local btn = gui.button(frame, gui.font_size.small)
+    --btn:SetPoint('RIGHT', hide_checkbox, 'LEFT', 70, 35)
+    btn:SetPoint('TOPRIGHT', -20, 25)
     gui.set_size(btn, 180, 24)
 	
     btn:SetText('Set buyout as current "Value"')
-	btn:SetScript('OnClick', setValue_button_click)
+    btn:SetScript('OnClick', setValue_button_click)
 
+
+    local btn = gui.button(frame, gui.font_size.small)
+    --btn:SetPoint('RIGHT', hide_checkbox, 'LEFT', 70, 60)
+    btn:SetPoint('TOPRIGHT', -20, 50)
+    gui.set_size(btn, 180, 24)
+	
+    btn:SetText('Set buyout as max auto-buy price')
+    btn:SetScript('OnClick', setAutobuyPrice_button_click)
 end
