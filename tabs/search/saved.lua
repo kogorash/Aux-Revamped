@@ -179,3 +179,37 @@ function move_down(list, index)
 		list[index], list[index + 1] = list[index + 1], list[index]
 	end
 end
+
+-----------------------
+function RunFavoriteAutoBuyoutScan_button_click()
+	runFavoritesLoopScan("")
+end
+
+function runFavoritesLoopScan(prev_filter_string)
+
+	--print("prev_filter_string = " .. prev_filter_string)
+				
+	local useNext_filter_string = false
+
+	for _, search in favorite_searches do
+		if search.auto_buy then
+			
+			if prev_filter_string == ""
+				or useNext_filter_string then
+				
+				print("Scan: " .. search.filter_string)
+				set_filter(search.filter_string)
+		   		execute(nil, nil, function()
+					runFavoritesLoopScan(search.filter_string)
+				end)
+			
+				return true
+
+			elseif search.filter_string == prev_filter_string then
+				useNext_filter_string = true
+			end
+
+		end
+	end
+
+end
