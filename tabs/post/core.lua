@@ -186,7 +186,7 @@ function price_update()
         local historical_value = history.value(selected_item.key)
         if get_bid_selection() or get_buyout_selection() then
 	        --set_unit_start_price(undercut(get_bid_selection() or get_buyout_selection(), stack_size_slider:GetValue(), get_bid_selection()))
-			set_unit_start_price(undercut(get_bid_selection() or get_buyout_selection(), stack_size_slider:GetValue()))
+			set_unit_start_price(undercut(get_bid_selection() or get_buyout_selection(), stack_size_slider:GetValue() ))
 	        unit_start_price_input:SetText(money.to_string(get_unit_start_price(), true, nil, nil, true))
         end
         if get_buyout_selection() then
@@ -483,24 +483,58 @@ end
 	end
 end
 
-function undercut(record, stack_size, stack)
-    --local price = ceil(record.unit_price * (stack and record.stack_size or stack_size))
-	local price = floor(ceil(record.unit_price * (stack and record.stack_size or stack_size)) / stack_size)
+function del_undercut(record, stack_size, stack)
+    local priceTotal = ceil(record.unit_price * (stack and record.stack_size or stack_size))
 	if not record.own then
-	    price = price - 1
+	    priceTotal = priceTotal - 1
     end
-    --return price / stack_size
-	return price
+
+    return ceil(price / stack_size)-1
 end
+
+function undercut(record, stack_size, stack)
+
+    local price = floor(ceil(record.unit_price * (stack and record.stack_size or stack_size)) / stack_size)
+
+    if not record.own then
+		price = price - 1
+    end
+    
+	return price
+
+end
+
 
 function quantity_update(maximize_count)
     if selected_item then
 
-		--local max_stack_count = selected_item.max_charges and selected_item.availability[stack_size_slider:GetValue()] or floor(selected_item.availability[0] / stack_size_slider:GetValue())
-		local stack_size = stack_size_slider:GetValue()
-    	local max_stack_count = selected_item.max_charges and floor(selected_item.availability[stack_size] / stack_size) or floor(selected_item.availability[0] / stack_size)
-        
-		stack_count_slider:SetMinMaxValues(1, max_stack_count)
+	--------------------------------------------
+	local stack_size = stack_size_slider:GetValue()
+    
+        local max_stack_count = selected_item.max_charges and floor(selected_item.availability[stack_size] / stack_size) or floor(selected_item.availability[0] / stack_size)
+
+	
+
+--[[
+	
+	--DevTools_Dump(selected_item.key .. " selected_item.max_charges = " .. selected_item.max_charges)
+	--DevTools_Dump("selected_item.availability[stack_size_slider:GetValue()]  = " .. selected_item.availability[stack_size_slider:GetValue()] )
+	--DevTools_Dump(selected_item.availability)
+	--DevTools_Dump(selected_item.key .. " stack_size_slider = " .. stack_size_slider:GetValue())
+
+	if selected_item.max_charges then
+	    --and selected_item.item_key == "20750:0" then
+		--DevTools_Dump("max_charges id " .. selected_item.key .. " = " ..  selected_item.max_charges .. " max_stack_count = " .. max_stack_count)
+		--DevTools_Dump("selected_item.availability[stack_size_slider:GetValue()" .. ]
+		--DevTools_Dump(selected_item.availability)
+
+	else
+	--	DevTools_Dump("max_charges id " .. selected_item.key .. " = nil")
+	--	DevTools_Dump(selected_item.availability)
+	end
+]]--
+
+        stack_count_slider:SetMinMaxValues(1, max_stack_count)
         if maximize_count then
             stack_count_slider:SetValue(max_stack_count)
         end
@@ -743,7 +777,7 @@ function initialize_duration_dropdown()
     }
 end
 
-------------------------------------------
+-----------------------
 function setValue_button_click()
 	
 	local unit_buyout_price = get_unit_buyout_price()
@@ -758,5 +792,23 @@ function setValue_button_click()
 	
 	scan.abort(scan_id)
 	history.setNewValue_AndClearHistory(selected_item.key, unit_buyout_price)
+
+end
+
+-----------------------
+function setAutobuyPrice_button_click()
+	
+	local unit_buyout_price = get_unit_buyout_price()
+	
+	if not selected_item then
+        	print("Select item to add data!")
+		return
+	elseif unit_buyout_price == 0 then
+        	print('Set "Unit buyout price"!')
+		return
+	end
+	
+	scan.abort(scan_id)
+	history.setAutobuyPrice(selected_item.key, unit_buyout_price)
 
 end
