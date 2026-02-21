@@ -1,5 +1,5 @@
 module 'aux.core.history'
-
+local money = require 'aux.util.money'
 
 --not using acecomm anymore
 --[[AuxAddon = AceLibrary("AceAddon-2.0"):new("AceComm-2.0")   --im unsure this is done correctly but seems to work lol
@@ -18,7 +18,8 @@ local aux = require 'aux'
 
 local persistence = require 'aux.util.persistence'
 
-local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='number'}, {data_points={'list', ';', {'tuple', '@', {value='number'}, {time='number'}}}}}
+--local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='number'}, {data_points={'list', ';', {'tuple', '@', {value='number'}, {time='number'}}}}}
+local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='number'}, {data_points={'list', ';', {'tuple', '@', {value='number'}, {time='number'}}}}, {max_autobuy = 'number'}}
 
 local value_cache = {}
 
@@ -137,11 +138,36 @@ function M.setNewValue_AndClearHistory(item_key, newValue)
     item_record.daily_min_buyout = newValue
 
     write_record(item_key, item_record)
-    
-    --DevTools_Dump(item_record)
-    		
-    return true
+    print("Set as avg market price: " .. money.to_string(newValue) )
+
+	return true
 end
+
+function M.setAutobuyPrice(item_key, newValue)
+    if not item_key then return end
+    
+    local item_record = read_record(item_key)
+
+    --DevTools_Dump(item_record)
+
+    if item_record.max_autobuy
+		and item_record.max_autobuy ~= newValue then
+		print("Set as max auto-buy price: " .. money.to_string(item_record.max_autobuy) .. " -> " .. money.to_string(newValue) .. ' ["' .. item_key .. '"]')
+    else
+		print("Set as max auto-buy price: " .. money.to_string(newValue) .. ' ["' .. item_key .. '"]')
+    end
+
+    item_record.max_autobuy = newValue
+
+    write_record(item_key, item_record)
+    
+	return true
+end
+
+function M.getMaxAutobuyPrice(item_key)
+    return read_record(item_key).max_autobuy or 0
+end
+
 ------------------------------------------------------------
 
 function aux.handle.LOAD2()
@@ -161,7 +187,8 @@ do
 end
 
 function new_record()
-	return T.temp-T.map('next_push', get_next_push(), 'data_points', T.acquire())
+	--return T.temp-T.map('next_push', get_next_push(), 'data_points', T.acquire())
+	return T.temp-T.map('next_push', get_next_push(), 'data_points', T.acquire(), 'max_autobuy', 0)
 end
 
 function read_record(item_key)
