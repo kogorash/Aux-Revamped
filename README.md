@@ -1,5 +1,27 @@
 # Aux-Revamped
 
+# 2026.02.21
+Auto-buyback has been reworked for automated use.
+
+<details>
+<summary>📷 1. "POST" tab: Manually specify the maximum unit price for the item at which it will be automatically purchased </summary>
+<br>On my server, "Black Lotus" has an average minimum price of 11,20. 
+<br>I want to instantly/automatically buy any amount if the price is below 10,30
+<br><br> <img width="725" height="488" alt="1" src="https://github.com/user-attachments/assets/9d0e1ff3-3301-48d1-b14b-16f01c54721e" />
+</details> 
+
+
+<details>
+<summary>📷 2. "SEARCH" tab: Add this item to your favorites and activate auto-purchase </summary>
+<img width="730" height="471" alt="2" src="https://github.com/user-attachments/assets/d0525925-7fd7-4a8b-913e-82992399ada5" />
+</details> 
+
+3. Use "Run favorite auto-buyout scan" for all activated items. 
+
+Be careful with the settings so you don't waste all your money on an incorrectly configured price!!!
+I use it for purchasing large quantities of herbs, because players on our server constantly list one item instead of a pack of 20.
+
+
 # 2025.11.24
 Fixed a bug where it was impossible to place items with charges, like weapon oil
 
