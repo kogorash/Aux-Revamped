@@ -4,6 +4,7 @@ local T = require 'T'
 local aux = require 'aux'
 local info = require 'aux.util.info'
 local history = require 'aux.core.history'
+local money = require 'aux.util.money'
 
 local PAGE_SIZE = 50
 
@@ -153,9 +154,32 @@ function scan_page(i)
 		history.process_auction(auction_info, pages)
 		
 		if (get_state().params.auto_buy_validator or pass)(auction_info) and auction_info.buyout_price >0 and auction_info.owner ~= UnitName("player") then
-			local send_signal, signal_received = aux.signal()
-			aux.when(signal_received, scan_page, i)
-			return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
+			--local send_signal, signal_received = aux.signal()
+			--aux.when(signal_received, scan_page, i)
+			--return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
+			local max_autobuy = history.getMaxAutobuyPrice(auction_info.item_key)
+			if max_autobuy > 0 
+				and auction_info.unit_buyout_price < max_autobuy then
+	
+				print("Buyout on " .. auction_info.name .. ": " .. money.to_string(auction_info.unit_buyout_price) .. " < " .. money.to_string(max_autobuy) )
+			
+				local send_signal, signal_received = aux.signal()
+				aux.when(signal_received, scan_page, i)
+				return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
+
+			elseif auction_info.unit_buyout_price < history.value(auction_info.item_key) * 0.50 then
+				print("TEST Buyout on " .. auction_info.name .. ": " .. money.to_string(auction_info.unit_buyout_price) .. " < 50% avg price" )
+			
+				--local send_signal, signal_received = aux.signal()
+				--aux.when(signal_received, scan_page, i)
+				--return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
+			end
+			
+			if not get_query().validator or get_query().validator(auction_info) then
+				do (get_state().params.on_auction or pass)(auction_info) end
+			end
+
+			
 		elseif (get_state().params.auto_bid_validator or pass)(auction_info) and auction_info.owner ~= UnitName("player") and auction_info.high_bidder == nil then
 			local send_signal, signal_received = aux.signal()
 			aux.when(signal_received, scan_page, i)
