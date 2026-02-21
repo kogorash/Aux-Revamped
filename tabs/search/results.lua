@@ -205,7 +205,7 @@ function start_real_time_scan(query, search, continuation)
 	}
 end
 
-function start_search(queries, continuation)
+function start_search(queries, continuation, user_callback)
 	local current_query, current_page, total_queries, start_query, start_page
 
 	local search = current_search()
@@ -280,6 +280,11 @@ end,
 
 			search.active = false
 			update_start_stop()
+			
+			if user_callback then
+				--print("Current scan complete")
+				user_callback()
+			end
 		end,
 		on_abort = function()
 			search.status_bar:update_status(1, 1)
@@ -300,7 +305,7 @@ end,
 	}
 end
 
-function M.execute(resume, real_time)
+function M.execute(resume, real_time, on_complete)
 
 	if resume then
 		real_time = current_search().real_time
@@ -365,7 +370,7 @@ function M.execute(resume, real_time)
 			query.blizzard_query.first_page = current_search().first_page
 			query.blizzard_query.last_page = current_search().last_page
 		end
-		start_search(queries, continuation)
+		start_search(queries, continuation, on_complete)
 	end
 end
 
