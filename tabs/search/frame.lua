@@ -558,3 +558,16 @@ for listing in T.temp-T.set(favorite_searches_listing, recent_searches_listing) 
 		listing:SetHandler(k, v)
 	end
 end
+
+-----------------------------------------------
+do
+    local btn = gui.button(frame, gui.font_size.small)
+    btn:SetPoint('TOPLEFT', 20, 25)
+    
+
+    gui.set_size(btn, 180, 24)
+	
+    btn:SetText('Run favorite auto-buyout scan')
+    btn:SetScript('OnClick', RunFavoriteAutoBuyoutScan_button_click)
+
+end
