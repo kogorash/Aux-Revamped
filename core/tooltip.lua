@@ -93,7 +93,14 @@ function M.extend_tooltip(tooltip, link, quantity)
     local value = history.value(item_key)
     if auctionable then
         if settings.value then
-            tooltip:AddLine('|cFFFFFFFFValue:|r ' .. (value and money.to_string(value * quantity) or UNKNOWN), {r=1, g=1, b=1})
+            --tooltip:AddLine('|cFFFFFFFFValue:|r ' .. (value and money.to_string(value * quantity) or UNKNOWN), {r=1, g=1, b=1})
+
+             local max_autobuy = history.getMaxAutobuyPrice(item_key)
+	        if max_autobuy > 0 then
+		        tooltip:AddLine('|cFFFFFFFFValue:|r ' .. (value and money.to_string(value * quantity) or UNKNOWN) .. '|cFFFFFFFF     Auto-buy:|r ' .. money.to_string(max_autobuy), {r=1, g=1, b=1})
+	        else
+		        tooltip:AddLine('|cFFFFFFFFValue:|r ' .. (value and money.to_string(value * quantity) or UNKNOWN), {r=1, g=1, b=1})
+	        end
         end
         if settings.daily then
             local market_value = history.market_value(item_key)
