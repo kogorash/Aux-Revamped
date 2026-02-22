@@ -157,8 +157,15 @@ function scan_page(i)
 			--local send_signal, signal_received = aux.signal()
 			--aux.when(signal_received, scan_page, i)
 			--return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
+			
 			local max_autobuy = history.getMaxAutobuyPrice(auction_info.item_key)
-			if max_autobuy > 0 
+			local avg_value = history.value(auction_info.item_key)
+			
+			if max_autobuy > 0
+				and max_autobuy > avg_value then
+				print("WARNING Buyout on " .. auction_info.name .. ": auto-buy price " .. money.to_string(max_autobuy) .. " is higher than avg " .. money.to_string(avg_value) )
+			
+			elseif max_autobuy > 0 
 				and auction_info.unit_buyout_price < max_autobuy then
 	
 				print("Buyout on " .. auction_info.name .. ": " .. money.to_string(auction_info.unit_buyout_price) .. " < " .. money.to_string(max_autobuy) )
@@ -167,7 +174,7 @@ function scan_page(i)
 				aux.when(signal_received, scan_page, i)
 				return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
 
-			elseif auction_info.unit_buyout_price < history.value(auction_info.item_key) * 0.50 then
+			elseif auction_info.unit_buyout_price < avg_value * 0.50 then
 				print("TEST Buyout on " .. auction_info.name .. ": " .. money.to_string(auction_info.unit_buyout_price) .. " < 50% avg price" )
 			
 				--local send_signal, signal_received = aux.signal()
