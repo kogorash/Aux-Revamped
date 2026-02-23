@@ -168,8 +168,8 @@ function scan_page(i)
 			elseif max_autobuy > 0 
 				and auction_info.unit_buyout_price < max_autobuy then
 	
-				print("Buyout on " .. auction_info.name .. ": " .. money.to_string(auction_info.unit_buyout_price) .. " < " .. money.to_string(max_autobuy) )
-			
+				print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " < " .. money.to_string(max_autobuy) )
+				
 				local send_signal, signal_received = aux.signal()
 				aux.when(signal_received, scan_page, i)
 				return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
