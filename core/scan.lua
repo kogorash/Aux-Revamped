@@ -166,9 +166,9 @@ function scan_page(i)
 				print("WARNING Buyout on " .. auction_info.name .. ": auto-buy price " .. money.to_string(max_autobuy) .. " is higher than avg " .. money.to_string(avg_value) )
 			
 			elseif max_autobuy > 0 
-				and auction_info.unit_buyout_price < max_autobuy then
+				and auction_info.unit_buyout_price <= max_autobuy then
 	
-				print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " < " .. money.to_string(max_autobuy) )
+				print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " <= " .. money.to_string(max_autobuy) )
 				
 				local send_signal, signal_received = aux.signal()
 				aux.when(signal_received, scan_page, i)
