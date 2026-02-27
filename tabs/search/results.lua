@@ -307,6 +307,8 @@ end
 
 function M.execute(resume, real_time, on_complete)
 
+	aux.account_data.autoBuyMaxPrice = 0
+
 	if resume then
 		real_time = current_search().real_time
 	elseif real_time == nil then

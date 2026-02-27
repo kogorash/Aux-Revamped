@@ -191,8 +191,32 @@ function scan_page(i)
 			local send_signal, signal_received = aux.signal()
 			aux.when(signal_received, scan_page, i)
 			return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.bid_price, send_signal)
-		elseif not get_query().validator or get_query().validator(auction_info) then
+
+		--elseif not get_query().validator or get_query().validator(auction_info) then
+		--	do (get_state().params.on_auction or pass)(auction_info) end
+
+		elseif not get_query().validator then
 			do (get_state().params.on_auction or pass)(auction_info) end
+
+		else
+			-- TESTING: auto-buy if set params in search bar
+
+			aux.account_data.autoBuyMaxPrice = 0
+			local validatorPassed = get_query().validator(auction_info)
+
+			if auction_info.unit_buyout_price > 0
+					and auction_info.unit_buyout_price <= aux.account_data.autoBuyMaxPrice
+					and auction_info.owner ~= UnitName("player")
+					and UnitName("player") == "Himozzy" then
+
+				print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " <= " .. money.to_string(aux.account_data.autoBuyMaxPrice) )
+
+				local send_signal, signal_received = aux.signal()
+				aux.when(signal_received, scan_page, i)
+				return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
+			elseif validatorPassed then
+				do (get_state().params.on_auction or pass)(auction_info) end
+			end
 		end
 	end
 

@@ -238,7 +238,19 @@ M.filters = {
             end
         end,
 	    },
-	
+	-------------------
+    ['price-autobuy'] = {
+        input_type = 'money',
+        validator = function(amount)
+            return function(auction_record)
+
+                aux.account_data.autoBuyMaxPrice = amount
+                --print("aux.account_data.autoBuyMaxPrice = " .. tostring(aux.account_data.autoBuyMaxPrice) )
+                return auction_record.buyout_price > 0
+
+            end
+        end
+    },
 }
 
 function operator(str)

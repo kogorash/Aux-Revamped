@@ -1,7 +1,7 @@
 # Aux-Revamped
 
 # 2026.02.21
-Auto-buyback has been reworked for automated use.
+Auto-buyout has been reworked for automated use.
 
 <details>
 <summary>📷 1. "POST" tab: Manually specify the maximum unit price for the item at which it will be automatically purchased </summary>
@@ -16,7 +16,7 @@ Auto-buyback has been reworked for automated use.
 <img width="730" height="471" alt="2" src="https://github.com/user-attachments/assets/d0525925-7fd7-4a8b-913e-82992399ada5" />
 </details> 
 
-3. Use "Run favorite auto-buyout scan" for all activated items. 
+3. Use standart search or optionally  "Run favorite auto-buyout scan" for all activated items. 
 
 Be careful with the settings so you don't waste all your money on an incorrectly configured price!!!
 I use it for purchasing large quantities of herbs, because players on our server constantly list one item instead of a pack of 20.
