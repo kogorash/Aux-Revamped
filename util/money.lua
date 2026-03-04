@@ -57,7 +57,7 @@ function M.to_string2(money, exact, color)
 end
 
 function M.to_string(money, pad, trim, _, no_color)
-    local is_negative = money < 0
+    local is_negative = (money or 0) < 0
     money = abs(money)
     local gold, silver, copper = to_gsc(money)
 

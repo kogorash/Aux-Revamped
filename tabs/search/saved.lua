@@ -191,18 +191,24 @@ function runFavoritesLoopScan(prev_filter_string)
 				
 	local useNext_filter_string = false
 
+	--get_state().params.LoopScan = true
+	--print("0 get_state().params.LoopScan" .. tostring(get_state().params.LoopScan) )
+
 	for _, search in favorite_searches do
 		if search.auto_buy then
 			
 			if prev_filter_string == ""
 				or useNext_filter_string then
-				
+
+				aux.favoritesAutoBuyScan.isActive = true
+                aux.favoritesAutoBuyScan.isCompleted = false
+
 				print("Scan: " .. search.filter_string)
 				set_filter(search.filter_string)
 		   		execute(nil, nil, function()
 					runFavoritesLoopScan(search.filter_string)
 				end)
-			
+
 				return true
 
 			elseif search.filter_string == prev_filter_string then

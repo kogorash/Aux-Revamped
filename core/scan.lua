@@ -77,6 +77,14 @@ function last_page(total_auctions)
 end
 
 function scan()
+
+    if aux.favoritesAutoBuyScan.isActive
+        and aux.favoritesAutoBuyScan.isCompleted then
+        --print("-7- skip after page: " .. (get_state().page + 1))
+        print("skip after page: " .. (get_state().page + 1))
+        stop()
+    end
+
 	get_state().query_index = get_state().query_index and get_state().query_index + 1 or 1
 	if get_query() and not get_state().stopped then
 		do (get_state().params.on_start_query or pass)(get_state().query_index) end
@@ -132,14 +140,16 @@ function scan_page(i)
 
 	if i > PAGE_SIZE then
 		do (get_state().params.on_page_scanned or pass)() end
+
 		if get_query().blizzard_query and get_state().page < last_page(get_state().total_auctions) then
-			get_state().page = get_state().page + 1
-			
+		    get_state().page = get_state().page + 1
 			return submit_query()
 		else
-			return scan()
+		    return scan()
 		end
 	end
+
+    --print("-8- Scanning page: " .. tostring(get_state().page) )
 
 	local auction_info = info.auction(i, get_state().params.type)
 	if auction_info and (auction_info.owner or get_state().params.ignore_owner or aux.account_data.ignore_owner) then
@@ -152,37 +162,57 @@ function scan_page(i)
 		end
 		
 		history.process_auction(auction_info, pages)
-		
-		if (get_state().params.auto_buy_validator or pass)(auction_info) and auction_info.buyout_price >0 and auction_info.owner ~= UnitName("player") then
-			--local send_signal, signal_received = aux.signal()
-			--aux.when(signal_received, scan_page, i)
-			--return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
-			
-			local max_autobuy = history.getMaxAutobuyPrice(auction_info.item_key)
-			local avg_value = history.value(auction_info.item_key)
-			
-			if max_autobuy > 0
-				and max_autobuy > avg_value then
-				print("WARNING Buyout on " .. auction_info.name .. ": auto-buy price " .. money.to_string(max_autobuy) .. " is higher than avg " .. money.to_string(avg_value) )
-			
-			elseif max_autobuy > 0 
-				and auction_info.unit_buyout_price <= max_autobuy then
-	
-				print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " <= " .. money.to_string(max_autobuy) )
-				
-				local send_signal, signal_received = aux.signal()
+
+		aux.favoritesAutoBuyScan.searchStringAutobuyPrice = 0
+        local validatorPassed = not get_query().validator or get_query().validator(auction_info)
+
+	    if auction_info.unit_buyout_price > 0
+				and auction_info.unit_buyout_price <= aux.favoritesAutoBuyScan.searchStringAutobuyPrice
+				and auction_info.owner ~= UnitName("player") then
+
+				print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " <= " .. money.to_string(aux.favoritesAutoBuyScan.searchStringAutobuyPrice) )
+
+	            local send_signal, signal_received = aux.signal()
 				aux.when(signal_received, scan_page, i)
 				return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
 
+		elseif (get_state().params.auto_buy_validator or pass)(auction_info) and auction_info.buyout_price >0 and auction_info.owner ~= UnitName("player") then
+			--local send_signal, signal_received = aux.signal()
+			--aux.when(signal_received, scan_page, i)
+			--return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
+
+			--print("1 get_state().params.LoopScan" .. tostring(get_state().params.LoopScan) )
+			local max_autobuy = history.getMaxAutobuyPrice(auction_info.item_key)
+			local avg_value = history.value(auction_info.item_key)
+
+
+			if max_autobuy > 0 then
+				if max_autobuy > avg_value then
+					print("WARNING Buyout on " .. auction_info.name .. ": auto-buy price " .. money.to_string(max_autobuy) .. " is higher than avg " .. money.to_string(avg_value) )
+				elseif auction_info.unit_buyout_price <= max_autobuy then
+
+					print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " <= " .. money.to_string(max_autobuy) )
+
+					local send_signal, signal_received = aux.signal()
+					aux.when(signal_received, scan_page, i)
+					return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
+
+				elseif aux.favoritesAutoBuyScan.isActive
+					and auction_info.unit_bid_price > max_autobuy
+					and auction_info.unit_buyout_price > max_autobuy
+					and auction_info.aux_quantity == auction_info.max_stack
+					and not aux.favoritesAutoBuyScan.isCompleted then
+					--There is no point in continuing to scan further, price wont be lower
+					aux.favoritesAutoBuyScan.isCompleted = true
+					--print("-1- temp.favoritesAutoBuyScan.isCompleted = " .. tostring(aux.favoritesAutoBuyScan.isCompleted))
+                end
+
 			elseif auction_info.unit_buyout_price < avg_value * 0.50 then
 				print("TEST Buyout on " .. auction_info.name .. ": " .. money.to_string(auction_info.unit_buyout_price) .. " < 50% avg price" )
-			
-				--local send_signal, signal_received = aux.signal()
-				--aux.when(signal_received, scan_page, i)
-				--return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
 			end
 			
-			if not get_query().validator or get_query().validator(auction_info) then
+			--if not get_query().validator or get_query().validator(auction_info) then
+			if validatorPassed then
 				do (get_state().params.on_auction or pass)(auction_info) end
 			end
 
@@ -195,21 +225,17 @@ function scan_page(i)
 		--elseif not get_query().validator or get_query().validator(auction_info) then
 		--	do (get_state().params.on_auction or pass)(auction_info) end
 
-		elseif not get_query().validator then
-			do (get_state().params.on_auction or pass)(auction_info) end
-
-		else
-			-- TESTING: auto-buy if set params in search bar
-
-			aux.account_data.autoBuyMaxPrice = 0
-			local validatorPassed = get_query().validator(auction_info)
+		--[[else
+			-- TESTING: auto-buy on found params in search bar
+			aux.favoritesAutoBuyScan.searchStringAutobuyPrice = 0
+			local validatorPassed = not get_query().validator or get_query().validator(auction_info)
 
 			if auction_info.unit_buyout_price > 0
-					and auction_info.unit_buyout_price <= aux.account_data.autoBuyMaxPrice
-					and auction_info.owner ~= UnitName("player")
-					and UnitName("player") == "Himozzy" then
+					and auction_info.unit_buyout_price <= aux.favoritesAutoBuyScan.searchStringAutobuyPrice
+					and auction_info.owner ~= UnitName("player") then
+					--and UnitName("player") == "Himozzy" then
 
-				print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " <= " .. money.to_string(aux.account_data.autoBuyMaxPrice) )
+				print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " <= " .. money.to_string(aux.favoritesAutoBuyScan.searchStringAutobuyPrice) )
 
 				local send_signal, signal_received = aux.signal()
 				aux.when(signal_received, scan_page, i)
@@ -217,7 +243,10 @@ function scan_page(i)
 			elseif validatorPassed then
 				do (get_state().params.on_auction or pass)(auction_info) end
 			end
-		end
+		end]]--
+		elseif validatorPassed then
+        	do (get_state().params.on_auction or pass)(auction_info) end
+        end
 	end
 
 	return scan_page(i + 1)

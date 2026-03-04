@@ -132,6 +132,9 @@ do
         if arg1 == 'RightButton' then
             set_filter(current_search().filter_string)
         end
+
+        aux.favoritesAutoBuyScan.isActive = false
+
         execute()
     end)
     start_button = btn

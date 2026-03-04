@@ -280,9 +280,10 @@ end,
 
 			search.active = false
 			update_start_stop()
-			
+
+			aux.favoritesAutoBuyScan.isActive = false
+
 			if user_callback then
-				--print("Current scan complete")
 				user_callback()
 			end
 		end,
@@ -301,13 +302,28 @@ end,
 
 			search.active = false
 			update_start_stop()
+
+			aux.favoritesAutoBuyScan.isActive = false
+            --[[if aux.favoritesAutoBuyScan.isActive
+			    and aux.favoritesAutoBuyScan.isCompleted then
+
+			    aux.favoritesAutoBuyScan.isActive = false
+
+                if user_callback then
+                --    user_callback()
+                end
+            end]]--
+
 		end,
 	}
 end
 
 function M.execute(resume, real_time, on_complete)
 
-	aux.account_data.autoBuyMaxPrice = 0
+	aux.favoritesAutoBuyScan.searchStringAutobuyPrice = 0
+
+    --print("-0- results M.execute search_scan_id = " .. tostring(search_scan_id) )
+
 
 	if resume then
 		real_time = current_search().real_time

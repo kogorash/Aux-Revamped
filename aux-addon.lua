@@ -66,9 +66,20 @@ function handle.LOAD()
         merchant_buy = {},
         merchant_sell = {},
 		sharing = false,
-		autoBuyMaxPrice = 0,
-    })
-    do
+		--autoBuyMaxPrice = 0,
+	})
+
+    --aux.favoritesAutoBuyScan.searchStringAutobuyPrice
+
+	M.favoritesAutoBuyScan = M.favoritesAutoBuyScan or {
+		searchStringAutobuyPrice = 0,
+		--favoritesLoopScan = {
+		isActive = false,
+		isCompleted = false,
+
+	}
+
+	do
         local key = format('%s|%s', GetCVar'realmName', UnitName'player')
         aux.character[key] = aux.character[key] or {}
         M.character_data = assign(aux.character[key], {

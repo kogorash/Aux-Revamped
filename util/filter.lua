@@ -244,8 +244,7 @@ M.filters = {
         validator = function(amount)
             return function(auction_record)
 
-                aux.account_data.autoBuyMaxPrice = amount
-                --print("aux.account_data.autoBuyMaxPrice = " .. tostring(aux.account_data.autoBuyMaxPrice) )
+                aux.favoritesAutoBuyScan.searchStringAutobuyPrice = amount
                 return auction_record.buyout_price > 0
 
             end
