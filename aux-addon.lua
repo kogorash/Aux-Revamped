@@ -76,7 +76,10 @@ function handle.LOAD()
 		--favoritesLoopScan = {
 		isActive = false,
 		isCompleted = false,
-
+        currSearch = "",
+        currPageCount = 0,
+        currPrice = 0,
+        currPageSum = 0,
 	}
 
 	do

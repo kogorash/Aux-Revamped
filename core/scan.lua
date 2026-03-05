@@ -78,12 +78,13 @@ end
 
 function scan()
 
-    if aux.favoritesAutoBuyScan.isActive
+    --[[if aux.favoritesAutoBuyScan.isActive
         and aux.favoritesAutoBuyScan.isCompleted then
-        --print("-7- skip after page: " .. (get_state().page + 1))
-        print("skip after page: " .. (get_state().page + 1))
+
+        --print("skip after page: " .. (get_state().page + 1))
+        print("Auto-buyout price exceeded, stop after page " .. (get_state().page + 1) .. ", go to next favorite")
         stop()
-    end
+    end]]--
 
 	get_state().query_index = get_state().query_index and get_state().query_index + 1 or 1
 	if get_query() and not get_state().stopped then
@@ -141,7 +142,29 @@ function scan_page(i)
 	if i > PAGE_SIZE then
 		do (get_state().params.on_page_scanned or pass)() end
 
+		--if aux.favoritesAutoBuyScan.isActive
+		if aux.favoritesAutoBuyScan.currPageCount > 0 then
+
+		    print("Buyout on " .. aux.favoritesAutoBuyScan.currSearch .. "(" .. aux.favoritesAutoBuyScan.currPageCount
+		        .. " total from page " .. (get_state().page + 1).. "): avg " .. money.to_string(aux.favoritesAutoBuyScan.currPageSum / aux.favoritesAutoBuyScan.currPageCount)
+		        .. " <= " .. money.to_string(aux.favoritesAutoBuyScan.currPrice) )
+            aux.favoritesAutoBuyScan.currPageCount = 0
+            aux.favoritesAutoBuyScan.currPageSum = 0
+		end
+
+
+
+
 		if get_query().blizzard_query and get_state().page < last_page(get_state().total_auctions) then
+
+		    --print("curr page " .. (get_state().page + 1) )
+            if aux.favoritesAutoBuyScan.isActive
+                and aux.favoritesAutoBuyScan.isCompleted then
+                print("Auto-buyout price exceeded, stop after page " .. (get_state().page + 1) .. ", go to next favorite")
+                stop()
+                return scan()
+            end
+
 		    get_state().page = get_state().page + 1
 			return submit_query()
 		else
@@ -150,6 +173,7 @@ function scan_page(i)
 	end
 
     --print("-8- Scanning page: " .. tostring(get_state().page) )
+    local autobuy_count = 0
 
 	local auction_info = info.auction(i, get_state().params.type)
 	if auction_info and (auction_info.owner or get_state().params.ignore_owner or aux.account_data.ignore_owner) then
@@ -170,7 +194,15 @@ function scan_page(i)
 				and auction_info.unit_buyout_price <= aux.favoritesAutoBuyScan.searchStringAutobuyPrice
 				and auction_info.owner ~= UnitName("player") then
 
-				print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " <= " .. money.to_string(aux.favoritesAutoBuyScan.searchStringAutobuyPrice) )
+				if aux.favoritesAutoBuyScan.searchStringAutobuyPrice < 10000 then
+				    aux.favoritesAutoBuyScan.currPageCount = aux.favoritesAutoBuyScan.currPageCount + auction_info.aux_quantity
+				    aux.favoritesAutoBuyScan.currPageSum = aux.favoritesAutoBuyScan.currPageSum + auction_info.buyout_price
+				    aux.favoritesAutoBuyScan.currPrice = aux.favoritesAutoBuyScan.searchStringAutobuyPrice
+				    aux.favoritesAutoBuyScan.currSearch = auction_info.name
+
+				else
+				    print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " <= " .. money.to_string(aux.favoritesAutoBuyScan.searchStringAutobuyPrice) )
+				end
 
 	            local send_signal, signal_received = aux.signal()
 				aux.when(signal_received, scan_page, i)
@@ -188,10 +220,20 @@ function scan_page(i)
 
 			if max_autobuy > 0 then
 				if max_autobuy > avg_value then
-					print("WARNING Buyout on " .. auction_info.name .. ": auto-buy price " .. money.to_string(max_autobuy) .. " is higher than avg " .. money.to_string(avg_value) )
+					print("WARNING skip Buyout on " .. auction_info.name .. ": auto-buy price " .. money.to_string(max_autobuy) .. " is higher than avg " .. money.to_string(avg_value) )
 				elseif auction_info.unit_buyout_price <= max_autobuy then
 
-					print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " <= " .. money.to_string(max_autobuy) )
+					--if aux.favoritesAutoBuyScan.isActive
+                    if max_autobuy < 10000 then
+                    	aux.favoritesAutoBuyScan.currPageCount = aux.favoritesAutoBuyScan.currPageCount + auction_info.aux_quantity
+                    	aux.favoritesAutoBuyScan.currPrice = max_autobuy
+                    	aux.favoritesAutoBuyScan.currPageSum = aux.favoritesAutoBuyScan.currPageSum + auction_info.buyout_price
+                        aux.favoritesAutoBuyScan.currSearch = auction_info.name
+
+                    else
+                        print("Buyout on " .. auction_info.name .. "(" .. auction_info.aux_quantity .. "): " .. money.to_string(auction_info.unit_buyout_price) .. " <= " .. money.to_string(max_autobuy) )
+                    end
+
 
 					local send_signal, signal_received = aux.signal()
 					aux.when(signal_received, scan_page, i)
@@ -208,7 +250,7 @@ function scan_page(i)
                 end
 
 			elseif auction_info.unit_buyout_price < avg_value * 0.50 then
-				print("TEST Buyout on " .. auction_info.name .. ": " .. money.to_string(auction_info.unit_buyout_price) .. " < 50% avg price" )
+				print("TODO, Buyout on " .. auction_info.name .. ": " .. money.to_string(auction_info.unit_buyout_price) .. " < 50% avg price" )
 			end
 			
 			--if not get_query().validator or get_query().validator(auction_info) then
